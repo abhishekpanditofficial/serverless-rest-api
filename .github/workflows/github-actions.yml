@@ -9,20 +9,24 @@ jobs:
   productionDeployment:
     name: production deployment
     runs-on: ubuntu-latest
+    # environment:
+    #   name: production
+    #   url: https://test.com
     strategy:
       matrix:
         node-version: [16.x]
     steps:
     - uses: actions/checkout@v2
     - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v3
+      uses: actions/setup-node@v3 
       with:
         node-version: ${{ matrix.node-version }}
     - run: npm ci
-    - name: serverless deploy
+    - name: Install Plugin and Deploy
       uses: serverless/github-action@v2
       with:
-        args: deploy
+        args: -c "serverless plugin install --name serverless-iam-roles-per-function && serverless deploy --stage production"
+        entrypoint: /bin/sh
       env:
         # SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
         # or if using AWS credentials directly
