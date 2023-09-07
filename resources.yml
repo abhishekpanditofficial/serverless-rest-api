@@ -34,6 +34,11 @@ cognitoUserPoolWebClient:
       - openid
     AllowedOAuthFlows:
       - implicit
+    ExplicitAuthFlows:
+      - ALLOW_ADMIN_USER_PASSWORD_AUTH
+      - ALLOW_REFRESH_TOKEN_AUTH
+      - ALLOW_CUSTOM_AUTH
+      - ALLOW_USER_SRP_AUTH
     CallbackURLs:
       - http://localhost:3000
 
@@ -52,3 +57,51 @@ userPoolIdParam:
     Name: /notes/${self:provider.stage}/userPoolId
     Type: String
     Value: !GetAtt cognitoUserPool.Arn
+
+# Cache Policy
+restAPICachePolicy:
+  Type: AWS::CloudFront::CachePolicy
+  Properties:
+    CachePolicyConfig:
+      DefaultTTL: 300
+      MaxTTL: 31536000
+      MinTTL: 60
+      Name: RestAPICachePolicy
+      ParametersInCacheKeyAndForwardedToOrigin:
+        CookieConfig:
+          CookieBehavior: none
+        EnableAcceptEncodingBrotli: true
+        EnableAcceptEncodingGzip: true
+        HeadersConfig:
+          HeaderBehavior: whitelist
+          Headers:
+            - Authorization
+          QueryStringsConfig:
+            QueryStringBehavior: none
+
+
+#Cloudfront Distribution
+cloudfrontDistribution:
+  Type: AWS::CloudFront::Distribution
+  Properties: 
+    DistributionConfig: 
+      Enabled: true
+      DefaultCacheBehavior:
+        TargetOriginId: restAPIOrigin
+        CachePolicyId: !Ref restAPICachePolicy
+        ViewerProtocolPolicy: https-only
+      CacheBehavior:
+        - PathPattern: /dev/*
+          TargetOriginId: restAPIOrigin
+          cachePolicyId: !Ref restAPICachePolicy
+          ViewerProtocolPolicy: https-only
+      Origins:
+        - Id: restAPIOrigin
+          DomainName: !Join
+            - "."
+            - - !Ref ApiGatewayRestApi
+              - "execute-api"
+              - ${aws:region}
+              - "amazonaws.com"
+          CustomOriginConfig:
+            OriginProtocolPolicy: https-only
