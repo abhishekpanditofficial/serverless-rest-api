@@ -31,7 +31,7 @@ export const createNote = async (
   let data = JSON.parse(event.body as string);
   try {
     const params: DynamoDB.DocumentClient.PutItemInput = {
-      TableName: NOTES_TABLE_NAME as String,
+      TableName: NOTES_TABLE_NAME as string,
       Item: {
         notesId: data.id,
         title: data.title,

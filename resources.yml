@@ -68,7 +68,7 @@ restAPICachePolicy:
       MinTTL: 60
       Name: RestAPICachePolicy
       ParametersInCacheKeyAndForwardedToOrigin:
-        CookieConfig:
+        CookiesConfig:
           CookieBehavior: none
         EnableAcceptEncodingBrotli: true
         EnableAcceptEncodingGzip: true
@@ -76,24 +76,26 @@ restAPICachePolicy:
           HeaderBehavior: whitelist
           Headers:
             - Authorization
-          QueryStringsConfig:
-            QueryStringBehavior: none
+        QueryStringsConfig:
+          QueryStringBehavior: none
 
 
-#Cloudfront Distribution
+
+
+# Cloudfront Distribution
 cloudfrontDistribution:
   Type: AWS::CloudFront::Distribution
-  Properties: 
-    DistributionConfig: 
+  Properties:
+    DistributionConfig:
       Enabled: true
       DefaultCacheBehavior:
         TargetOriginId: restAPIOrigin
         CachePolicyId: !Ref restAPICachePolicy
         ViewerProtocolPolicy: https-only
-      CacheBehavior:
+      CacheBehaviors:
         - PathPattern: /dev/*
           TargetOriginId: restAPIOrigin
-          cachePolicyId: !Ref restAPICachePolicy
+          CachePolicyId: !Ref restAPICachePolicy
           ViewerProtocolPolicy: https-only
       Origins:
         - Id: restAPIOrigin

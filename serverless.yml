@@ -75,7 +75,7 @@ functions:
           method: get
           path: notes
           authorizer: 
-            name: MyNotesUP
+            name: MyNotesUP-${self:provider.stage}
             type: COGNITO_USER_POOLS
             arn: !GetAtt cognitoUserPool.Arn
 
